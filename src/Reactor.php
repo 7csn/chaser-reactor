@@ -9,15 +9,16 @@ namespace chaser\reactor;
  *
  * @package chaser\reactor
  */
-class Reactor extends ReactorAbstract
+class Reactor implements ReactorInterface
 {
     /**
-     * 事件反应类库
+     * 优先的事件反应类库
+     *
+     * @var string[]
      */
-    public const CLASSES = [
+    protected static array $classes = [
         Event::class,
-        Libevent::class,
-        Select::class
+        Libevent::class
     ];
 
     /**
@@ -28,46 +29,59 @@ class Reactor extends ReactorAbstract
     protected ReactorInterface $app;
 
     /**
+     * 注册优先的事件反应类库
+     *
+     * @param string ...$classes
+     */
+    public static function register(string ...$classes)
+    {
+        array_unshift(self::$classes, ...$classes);
+    }
+
+    /**
      * 初始化应用
      */
     public function __construct()
     {
-        foreach (self::CLASSES as $class) {
-            if (class_exists($class)) {
-                $this->app = new $class;
-                break;
-            }
+        if ($this->initApp() === null) {
+            $this->app = new Select();
         }
     }
 
     /**
-     * 添加事件侦听器
+     * 初始化事件反应应用
      *
-     * @param resource|int $fd 流|信号|定时
-     * @param int $flag 事件类型
-     * @param callable $callback 回调方法
-     * @param array $args 回调参数
-     * @return bool|int
+     * @return ReactorInterface|null
      */
-    public function add($fd, int $flag, callable $callback, array $args = [])
+    protected function initApp(): ?ReactorInterface
     {
-        return $this->app->add($fd, $flag, $callback, $args);
+        foreach (self::$classes as $class) {
+            if ($class instanceof ReactorInterface) {
+                $this->app = new $class;
+                break;
+            }
+        }
+        return $this->app;
     }
 
     /**
-     * 移除事件侦听器
-     *
-     * @param resource|int $fd 流|信号|定时器ID
-     * @param int $flag 事件类型
-     * @return bool
+     * @inheritDoc
      */
-    public function del($fd, int $flag)
+    public function add($fd, int $flag, callable $callback)
+    {
+        return $this->app->add($fd, $flag, $callback);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function del($fd, int $flag): bool
     {
         return $this->app->del($fd, $flag);
     }
 
     /**
-     * 主回路
+     * @inheritDoc
      */
     public function loop()
     {
@@ -75,7 +89,7 @@ class Reactor extends ReactorAbstract
     }
 
     /**
-     * 破坏回路
+     * @inheritDoc
      */
     public function destroy()
     {
@@ -83,7 +97,7 @@ class Reactor extends ReactorAbstract
     }
 
     /**
-     * 清空定时器事件侦听
+     * @inheritDoc
      */
     public function clearAllTimer()
     {
@@ -91,9 +105,7 @@ class Reactor extends ReactorAbstract
     }
 
     /**
-     * 获取定时器数量
-     *
-     * @return integer
+     * @inheritDoc
      */
     public function getTimerCount()
     {
