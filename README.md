@@ -3,7 +3,6 @@
 ### 运行环境
 - Linux
 - PHP >= 7.4.0
-- pcntl 扩展
 ### 安装（可省）
 ```
 composer require 7csn/reactor
