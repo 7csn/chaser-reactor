@@ -103,7 +103,7 @@ composer require 7csn/reactor
               Reactor::EV_WRITE       # 套接字写
               Reactor::EV_SIGNAL      # 信号
               Reactor::EV_INTERVAL    # 周期性定时器
-              Reactor::EV_TIMEout     # 一次性定时器
+              Reactor::EV_TIMEOUT     # 一次性定时器
         ```
 * 事件轮询
 
