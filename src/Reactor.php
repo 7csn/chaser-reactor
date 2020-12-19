@@ -17,8 +17,9 @@ class Reactor implements ReactorInterface
      * @var string[]
      */
     protected static array $classes = [
-        EventLoop::class,
-        Libevent::class
+        Event::class,
+        Libevent::class,
+        Select::class
     ];
 
     /**
@@ -30,11 +31,13 @@ class Reactor implements ReactorInterface
 
     /**
      * 初始化应用
+     *
+     * @throws AppNotFoundException
      */
     public function __construct()
     {
         if ($this->initApp() === null) {
-            $this->app = new Select();
+            throw new AppNotFoundException("Please install one of the 7csn/reactor-select, 7csn/reactor-libevent, 7csn/reactor-event libraries");
         }
     }
 
@@ -46,7 +49,7 @@ class Reactor implements ReactorInterface
     protected function initApp(): ?ReactorInterface
     {
         foreach (self::$classes as $class) {
-            if ($class instanceof ReactorInterface) {
+            if (class_exists($class)) {
                 $this->app = new $class;
                 break;
             }
@@ -89,24 +92,24 @@ class Reactor implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function clearAllTimer()
-    {
-        $this->app->clearAllTimer();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTimerCount()
-    {
-        return $this->app->getTimerCount();
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function __call($name, $args)
     {
         return $this->app->$name(...$args);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clear(int $flag = null)
+    {
+        $this->clear($flag);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCount(int $flag = null): int
+    {
+        return $this->getCount($flag);
     }
 }
