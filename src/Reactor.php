@@ -17,7 +17,7 @@ class Reactor implements ReactorInterface
      * @var string[]
      */
     protected static array $classes = [
-        Event::class,
+        EventLoop::class,
         Libevent::class
     ];
 
@@ -27,16 +27,6 @@ class Reactor implements ReactorInterface
      * @var ReactorInterface
      */
     protected ReactorInterface $app;
-
-    /**
-     * 注册优先的事件反应类库
-     *
-     * @param string ...$classes
-     */
-    public static function register(string ...$classes)
-    {
-        array_unshift(self::$classes, ...$classes);
-    }
 
     /**
      * 初始化应用
@@ -110,5 +100,13 @@ class Reactor implements ReactorInterface
     public function getTimerCount()
     {
         return $this->app->getTimerCount();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __call($name, $args)
+    {
+        return $this->app->$name(...$args);
     }
 }
