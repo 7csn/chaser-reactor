@@ -125,4 +125,3 @@ composer require 7csn/reactor
     // 默认清空所有事件侦听
     $reactor->clear(int $flag = null);
     ```
-### 性能升级
