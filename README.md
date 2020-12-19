@@ -1,21 +1,24 @@
-# 事件反应器
+## 事件反应器
 事件反应驱动，用于事件的侦听与响应，可处理事件：信号、流读写、定时器。
-## 运行环境
+### 运行环境
 - Linux
 - PHP >= 7.4.0
 - pcntl 扩展
-### 安装
+### 安装（可省）
 ```
 composer require 7csn/reactor
 ```
-### 性能提升
-默认监听套接字流数量 <= 1024，为提升性能，可升级 reactor-libevent 或 reactor-event 库。
-* 升级 reactor-libevent
+### 安装应用类库（选一）
+* 安装 reactor-select
+    ```
+    composer require 7csn/reactor-select
+    ```
+* 安装 reactor-libevent（推荐）
 
     ```
     composer require 7csn/reactor-libevent
     ```
-* 升级 reactor-event
+* 安装 reactor-event（推荐）
 
     ```
     composer require 7csn/reactor-event
