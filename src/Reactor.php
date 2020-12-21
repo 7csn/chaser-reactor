@@ -8,6 +8,17 @@ namespace chaser\reactor;
  * 事件反应驱动
  *
  * @package chaser\reactor
+ *
+ * @method      bool         addRead($fd, callable $callback)
+ * @method      bool         addWrite($fd, callable $callback)
+ * @method      bool         addSignal(int $signal, callable $callback)
+ * @method      false|int    addInterval(int $seconds, callable $callback)
+ * @method      false|int    addTimeout(int $seconds, callable $callback)
+ * @method      bool         delRead($fd)
+ * @method      bool         deWrite($fd)
+ * @method      bool         delSignal($fd)
+ * @method      bool         delInterval($fd)
+ * @method      bool         delTimeout($fd)
  */
 class Reactor implements ReactorInterface
 {
