@@ -15,7 +15,7 @@ namespace chaser\reactor;
  * @method      false|int    addInterval(int $seconds, callable $callback)
  * @method      false|int    addTimeout(int $seconds, callable $callback)
  * @method      bool         delRead($fd)
- * @method      bool         deWrite($fd)
+ * @method      bool         delWrite($fd)
  * @method      bool         delSignal($fd)
  * @method      bool         delInterval($fd)
  * @method      bool         delTimeout($fd)
