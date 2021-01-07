@@ -28,74 +28,75 @@ composer require 7csn/reactor
     ```php
     <?php
   
-    namespace chaser\Reactor;  
+    namespace chaser\reactor\Driver;  
+    namespace chaser\reactor\Reactor;  
   
     // composer 自加载，路径视具体情况而定
     require __DIR__ . '/vendor/autoload.php';
   
     // 事件反应驱动对象
-    $reactor = new Reactor();
+    $driver = new Driver();
 * 事件侦听
     * 套接字读
 
         ```php
         # 增
-        $reactor->addRead(resource $fd, callable $callback): bool;
+        $driver->addRead(resource $fd, callable $callback): bool;
           # 内部回调
           $callback($fd);
       
         # 删
-        $reactor->delRead(resource $fd): bool;
+        $driver->delRead(resource $fd): bool;
         ```
     * 套接字写
 
         ```php
         # 增
-        $reactor->addWrite(resource $fd, callable $callback): bool;
+        $driver->addWrite(resource $fd, callable $callback): bool;
           # 内部回调
           $callback($fd);
       
         # 删
-        $reactor->delWrite(resource $fd): bool;
+        $driver->delWrite(resource $fd): bool;
         ```
     * 信号
 
         ```php
         # 增
-        $reactor->addSignal(int $signal, callable $callback): bool;
+        $driver->addSignal(int $signal, callable $callback): bool;
           # 内部回调
           $callback($signal);
       
         # 删
-        $reactor->delSignal(int $signal): bool;
+        $driver->delSignal(int $signal): bool;
         ```
     * 周期性定时器
 
         ```php
         # 增
-        $reactor->addInterval(int $seconds, callable $callback): false|$timerId;
+        $driver->addInterval(int $seconds, callable $callback): false|$timerId;
           # 内部回调
           $callback($timerId);
       
         # 删
-        $reactor->delInterval(int $timerId): bool;
+        $driver->delInterval(int $timerId): bool;
         ```
     * 一次性定时器
 
         ```php
         # 增
-        $reactor->addTimeout(int $seconds, callable $callback): false|$timerId;
+        $driver->addTimeout(int $seconds, callable $callback): false|$timerId;
           # 内部回调
           $callback($timerId);
       
         # 删
-        $reactor->delTimeout(int $timerId): bool;
+        $driver->delTimeout(int $timerId): bool;
         ```
     * 兼容
     
         ```php
-        $reactor->add(resource $fd|int $signal|int $seconds, int $flag, callable $callback): bool|$timerId
-        $reactor->del(resource $fd|int $signal|int $timerId, int $flag): bool
+        $driver->add(resource $fd|int $signal|int $seconds, int $flag, callable $callback): bool|$timerId
+        $driver->del(resource $fd|int $signal|int $timerId, int $flag): bool
           # 事件类型
           $flag：
               Reactor::EV_READ        # 套接字读
@@ -108,22 +109,22 @@ composer require 7csn/reactor
 
     ```php
     // 内部事件循环响应，处理阻塞进程
-    $reactor->loop();
+    $driver->loop();
     ```
 * 中断事件轮询
 
     ```php
-    $reactor->destroy();
+    $driver->destroy();
     ```
 * 获取指定类型事件侦听数量
 
     ```php
     // 默认统计全部数量
-    $reactor->getCount(int $flag = null);
+    $driver->getCount(int $flag = null);
     ```
 * 清空指定类型事件侦听
 
     ```php
     // 默认清空所有事件侦听
-    $reactor->clear(int $flag = null);
+    $driver->clear(int $flag = null);
     ```
