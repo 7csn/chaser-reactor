@@ -28,8 +28,8 @@ composer require 7csn/reactor
     ```php
     <?php
   
-    namespace chaser\reactor\Driver;  
-    namespace chaser\reactor\Reactor;  
+    use chaser\reactor\Driver;  
+    use chaser\reactor\Reactor;  
   
     // composer 自加载，路径视具体情况而定
     require __DIR__ . '/vendor/autoload.php';
