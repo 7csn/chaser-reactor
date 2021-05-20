@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace chaser\reactor;
 
 /**
- * 事件反应器
+ * 事件反应抽象基类
  *
  * @package chaser\reactor
  */

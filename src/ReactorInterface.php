@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace chaser\reactor;
 
 /**
- * 事件反应器
+ * 事件反应接口
  *
  * @package chaser\reactor
  */
@@ -80,7 +80,7 @@ interface ReactorInterface
      *
      * @param int|null $flag
      */
-    public function clear(int $flag = null):void;
+    public function clear(int $flag = null): void;
 
     /**
      * 获取事件侦听数量

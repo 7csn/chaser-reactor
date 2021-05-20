@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace chaser\reactor;
 
 /**
- * 事件反应驱动
+ * 事件反应驱动类
  *
  * @package chaser\reactor
- *
- * @see Reactor
  *
  * @method      bool         addRead($fd, callable $callback)
  * @method      bool         addWrite($fd, callable $callback)
@@ -27,6 +25,8 @@ namespace chaser\reactor;
  * @method      void         destroy()
  * @method      void         clear(int $flag = null)
  * @method      int          getCount(int $flag = null)
+ *
+ * @see Reactor
  */
 class Driver
 {
@@ -35,7 +35,7 @@ class Driver
      *
      * @var string[]
      */
-    protected static array $classes = [
+    private static array $classes = [
         Event::class,
         Libevent::class,
         Select::class
@@ -46,7 +46,7 @@ class Driver
      *
      * @var ReactorInterface
      */
-    protected ReactorInterface $reactor;
+    private ReactorInterface $reactor;
 
     /**
      * 创建事件反应器实例
@@ -85,7 +85,7 @@ class Driver
      * @param array $args
      * @return mixed
      */
-    public function __call(string $name, array $args)
+    public function __call(string $name, array $args): mixed
     {
         return $this->reactor->$name(...$args);
     }
