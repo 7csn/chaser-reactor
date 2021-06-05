@@ -9,24 +9,28 @@ namespace chaser\reactor;
  *
  * @package chaser\reactor
  *
- * @method      bool         addRead($fd, callable $callback)
- * @method      bool         addWrite($fd, callable $callback)
- * @method      bool         addSignal(int $signal, callable $callback)
- * @method      false|int    addInterval(int $seconds, callable $callback)
- * @method      false|int    addTimeout(int $seconds, callable $callback)
- * @method      bool         delRead($fd)
- * @method      bool         delWrite($fd)
- * @method      bool         delSignal($fd)
- * @method      bool         delInterval($fd)
- * @method      bool         delTimeout($fd)
- * @method      bool|int     add($fd, int $flag, callable $callback)
- * @method      bool         del($fd, int $flag)
- * @method      void         loop()
- * @method      void         destroy()
- * @method      void         clear(int $flag = null)
- * @method      int          getCount(int $flag = null)
+ * @see ReactorInterface
+ *
+ * @method      bool|int    set($fd, int $flag, callable $callback)
+ * @method      bool        del($fd, int $flag)
+ * @method      void        loop()
+ * @method      void        break()
+ * @method      void        destroy()
+ * @method      void        clear(int $flag = null)
+ * @method      int         getCount(int $flag = null)
  *
  * @see Reactor
+ *
+ * @method      bool        setRead($fd, callable $callback)
+ * @method      bool        setWrite($fd, callable $callback)
+ * @method      bool        setSignal(int $signal, callable $callback)
+ * @method      int         setInterval(int $seconds, callable $callback)
+ * @method      int         setTimeout(int $seconds, callable $callback)
+ * @method      bool        delRead($fd)
+ * @method      bool        delWrite($fd)
+ * @method      bool        delSignal(int $signal)
+ * @method      bool        delInterval(int $timerId)
+ * @method      bool        delTimeout(int $timerId)
  */
 class Driver
 {

@@ -3,8 +3,7 @@
   "description": "事件反应驱动，用于事件的侦听与响应，可处理事件：信号、流读写、定时器。",
   "type": "library",
   "require": {
-    "php": ">=7.4.0",
-    "ext-pcntl": "*"
+    "php": "^8.0"
   },
   "license": "MIT",
   "authors": [

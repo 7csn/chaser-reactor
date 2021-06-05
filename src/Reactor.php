@@ -25,28 +25,86 @@ abstract class Reactor implements ReactorInterface
     ];
 
     /**
-     * 定时器事件ID
+     * 定时器备用 ID
      *
      * @var int
      */
-    protected int $timerId = 0;
+    private int $timerId = 1;
+
+    /**
+     * 生成写事件侦听器数据
+     *
+     * @param int $intFd
+     * @param resource $fd
+     * @param callable $callback
+     * @return mixed
+     */
+    abstract protected function makeReadData(int $intFd, $fd, callable $callback);
+
+    /**
+     * 生成读事件侦听器数据
+     *
+     * @param int $intFd
+     * @param resource $fd
+     * @param callable $callback
+     * @return mixed
+     */
+    abstract protected function makeWriteData(int $intFd, $fd, callable $callback);
+
+    /**
+     * 生成信号事件侦听器数据
+     *
+     * @param int $signal
+     * @param callable $callback
+     * @return mixed
+     */
+    abstract protected function makeSignalData(int $signal, callable $callback);
+
+    /**
+     * 生成周期性定时事件侦听器数据
+     *
+     * @param int $timerId
+     * @param int $seconds
+     * @param callable $callback
+     * @return mixed
+     */
+    abstract protected function makeIntervalData(int $timerId, int $seconds, callable $callback);
+
+    /**
+     * 生成一次性定时事件侦听加数据
+     *
+     * @param int $timerId
+     * @param int $seconds
+     * @param callable $callback
+     * @return mixed
+     */
+    abstract protected function makeTimeoutData(int $timerId, int $seconds, callable $callback);
+
+    /**
+     * 移事件侦听器的数据
+     *
+     * @param int $flag
+     * @param int $key
+     * @return bool
+     */
+    abstract protected function delDataModel(int $flag, int $key): bool;
 
     /**
      * @inheritDoc
      */
-    public function add($fd, int $flag, callable $callback)
+    public function set(mixed $fd, int $flag, callable $callback): bool|int
     {
         switch ($flag) {
             case self::EV_READ:
-                return $this->addRead($fd, $callback);
+                return $this->setRead($fd, $callback);
             case self::EV_WRITE:
-                return $this->addWrite($fd, $callback);
+                return $this->setWrite($fd, $callback);
             case self::EV_SIGNAL:
-                return $this->addSignal($fd, $callback);
+                return $this->setSignal($fd, $callback);
             case self::EV_INTERVAL:
-                return $this->addInterval($fd, $callback);
+                return $this->setInterval($fd, $callback);
             case self::EV_TIMEOUT:
-                return $this->addTimeout($fd, $callback);
+                return $this->setTimeout($fd, $callback);
         }
         return false;
     }
@@ -54,7 +112,7 @@ abstract class Reactor implements ReactorInterface
     /**
      * @inheritDoc
      */
-    public function del($fd, int $flag): bool
+    public function del(mixed $fd, int $flag): bool
     {
         switch ($flag) {
             case static::EV_READ:
@@ -72,39 +130,93 @@ abstract class Reactor implements ReactorInterface
     }
 
     /**
-     * 添加读事件侦听器
+     * 清空定时器事件侦听
+     */
+    public function clearTimer(): void
+    {
+        $this->clearModel(self::EV_INTERVAL);
+        $this->clearModel(self::EV_TIMEOUT);
+        $this->timerId = 1;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clear(int $flag = null): void
+    {
+        switch ($flag) {
+            case self::EV_READ:
+            case self::EV_WRITE:
+            case self::EV_SIGNAL:
+            case self::EV_INTERVAL:
+            case self::EV_TIMEOUT:
+                $this->clearModel($flag);
+                break;
+            case null:
+                $this->clearModel(self::EV_READ);
+                $this->clearModel(self::EV_WRITE);
+                $this->clearModel(self::EV_SIGNAL);
+                $this->clearTimer();
+                break;
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCount(int $flag = null): int
+    {
+        switch ($flag) {
+            case self::EV_READ:
+            case self::EV_WRITE:
+            case self::EV_SIGNAL:
+            case self::EV_INTERVAL:
+            case self::EV_TIMEOUT:
+                return count($this->events[$flag]);
+            case null:
+                return count($this->events[self::EV_READ])
+                    + count($this->events[self::EV_WRITE])
+                    + count($this->events[self::EV_SIGNAL])
+                    + count($this->events[self::EV_INTERVAL])
+                    + count($this->events[self::EV_TIMEOUT]);
+        }
+        return 0;
+    }
+
+    /**
+     * 设置读事件侦听器
      *
      * @param resource $fd
      * @param callable $callback
      * @return bool
      */
-    public function addRead($fd, callable $callback): bool
+    public function setRead($fd, callable $callback): bool
     {
-        return $this->addModel(self::EV_READ, (int)$fd, $fd, $callback, [$this, 'addReadData']);
+        return $this->setModel(self::EV_READ, fn($key) => $this->makeReadData($key, $fd, $callback), (int)$fd);
     }
 
     /**
-     * 添加写事件侦听器
+     * 设置写事件侦听器
      *
      * @param resource $fd
      * @param callable $callback
      * @return bool
      */
-    public function addWrite($fd, callable $callback): bool
+    public function setWrite($fd, callable $callback): bool
     {
-        return $this->addModel(self::EV_WRITE, (int)$fd, $fd, $callback, [$this, 'addWriteData']);
+        return $this->setModel(self::EV_WRITE, fn($key) => $this->makeWriteData($key, $fd, $callback), (int)$fd);
     }
 
     /**
-     * 添加信号事件侦听器
+     * 设置信号事件侦听器
      *
      * @param int $signal
      * @param callable $callback
      * @return bool
      */
-    public function addSignal(int $signal, callable $callback): bool
+    public function setSignal(int $signal, callable $callback): bool
     {
-        return $this->addModel(self::EV_SIGNAL, $signal, $signal, $callback, [$this, 'addSignalData']);
+        return $this->setModel(self::EV_SIGNAL, fn() => $this->makeSignalData($signal, $callback));
     }
 
     /**
@@ -112,13 +224,12 @@ abstract class Reactor implements ReactorInterface
      *
      * @param int $seconds
      * @param callable $callback
-     * @return int|false
+     * @return int
      */
-    public function addInterval(int $seconds, callable $callback)
+    public function setInterval(int $seconds, callable $callback): int
     {
-        $timerId = $this->makeTimerId();
-        $add = $this->addModel(self::EV_INTERVAL, $timerId, $seconds, $callback, [$this, 'addIntervalData']);
-        return $add ? $timerId : false;
+        $add = $this->setModel(self::EV_INTERVAL, fn($key) => $this->makeIntervalData($key, $seconds, $callback), $this->timerId);
+        return $add ? $this->timerId++ : 0;
     }
 
     /**
@@ -126,97 +237,12 @@ abstract class Reactor implements ReactorInterface
      *
      * @param int $seconds
      * @param callable $callback
-     * @return int|false
-     */
-    public function addTimeout(int $seconds, callable $callback)
-    {
-        $timerId = $this->makeTimerId();
-        $add = $this->addModel(self::EV_TIMEOUT, $timerId, $seconds, $callback, [$this, 'addTimeoutData']);
-        return $add ? $timerId : false;
-    }
-
-    /**
-     * 事件（读、写、信号）侦听器添加模型
-     *
-     * @param int $flag
-     * @param int $key
-     * @param mixed $fd
-     * @param callable $callback
-     * @param callable $addData
-     * @return bool|int
-     */
-    protected function addModel(int $flag, int $key, $fd, callable $callback, callable $addData): bool
-    {
-        $add = true;
-
-        if (!isset($this->events[$flag][$key])) {
-            $data = $addData($key, $fd, $callback);
-            if ($add = (bool)$data) {
-                $this->events[$flag][$key] = $data;
-            }
-        }
-
-        return $add;
-    }
-
-    /**
-     * 获取写事件侦听器添加数据
-     *
-     * @param int $intFd
-     * @param resource $fd
-     * @param callable $callback
-     * @return mixed
-     */
-    abstract protected function addReadData(int $intFd, $fd, callable $callback);
-
-    /**
-     * 获取读事件侦听器添加数据
-     *
-     * @param int $intFd
-     * @param resource $fd
-     * @param callable $callback
-     * @return mixed
-     */
-    abstract protected function addWriteData(int $intFd, $fd, callable $callback);
-
-    /**
-     * 获取信号事件侦听器添加数据
-     *
-     * @param int $key
-     * @param int $signal
-     * @param callable $callback
-     * @return mixed
-     */
-    abstract protected function addSignalData(int $key, int $signal, callable $callback);
-
-    /**
-     * 获取定时事件侦听器添加数据
-     *
-     * @param int $timerId
-     * @param int $seconds
-     * @param callable $callback
-     * @return mixed
-     */
-    abstract protected function addIntervalData(int $timerId, int $seconds, callable $callback);
-
-    /**
-     * 获取定时事件侦听器添加数据
-     *
-     * @param int $timerId
-     * @param int $seconds
-     * @param callable $callback
-     * @return mixed
-     */
-    abstract protected function addTimeoutData(int $timerId, int $seconds, callable $callback);
-
-    /**
-     * 生成定时ID
-     *
      * @return int
      */
-    protected function makeTimerId(): int
+    public function setTimeout(int $seconds, callable $callback): int
     {
-        return ++$this->timerId;
+        $add = $this->setModel(self::EV_TIMEOUT, fn($key) => $this->makeTimeoutData($key, $seconds, $callback), $this->timerId);
+        return $add ? $this->timerId++ : 0;
     }
 
     /**
@@ -275,7 +301,30 @@ abstract class Reactor implements ReactorInterface
     }
 
     /**
-     * 事件侦听器移除模型
+     * 设置事件侦听器
+     *
+     * @param int $flag
+     * @param callable $addData
+     * @param int|null $key
+     * @return bool
+     */
+    protected function setModel(int $flag, callable $addData, int $key = null): bool
+    {
+        if (isset($this->events[$flag][$key]) && !$this->delModel($flag, $key)) {
+            return false;
+        }
+
+        $data = $key === null ? $addData() : $addData($key);
+        if ($data === false) {
+            return false;
+        }
+
+        $this->events[$flag][$key] = $data;
+        return true;
+    }
+
+    /**
+     * 移除事件侦听器
      *
      * @param int $flag
      * @param int $key
@@ -286,7 +335,7 @@ abstract class Reactor implements ReactorInterface
         $del = true;
 
         if (isset($this->events[$flag][$key])) {
-            if ($this->delCallback($flag, $key)) {
+            if ($this->delDataModel($flag, $key)) {
                 unset($this->events[$flag][$key]);
             } else {
                 $del = false;
@@ -297,77 +346,14 @@ abstract class Reactor implements ReactorInterface
     }
 
     /**
-     * 移事件侦听
-     *
-     * @param int $flag
-     * @param int $key
-     * @return bool
-     */
-    abstract protected function delCallback(int $flag, int $key): bool;
-
-    /**
-     * 清空定时器事件侦听
-     */
-    protected function clearAllTimer()
-    {
-        $this->clearModel(self::EV_INTERVAL);
-        $this->clearModel(self::EV_TIMEOUT);
-        $this->timerId = 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function clear(int $flag = null): void
-    {
-        switch ($flag) {
-            case self::EV_READ:
-            case self::EV_WRITE:
-            case self::EV_SIGNAL:
-            case self::EV_INTERVAL:
-            case self::EV_TIMEOUT:
-                $this->clearModel($flag);
-                break;
-            case null:
-                $this->clearModel(self::EV_READ);
-                $this->clearModel(self::EV_WRITE);
-                $this->clearModel(self::EV_SIGNAL);
-                $this->clearAllTimer();
-                break;
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCount(int $flag = null): int
-    {
-        switch ($flag) {
-            case self::EV_READ:
-            case self::EV_WRITE:
-            case self::EV_SIGNAL:
-            case self::EV_INTERVAL:
-            case self::EV_TIMEOUT:
-                return count($this->events[$flag]);
-            case null:
-                return count($this->events[self::EV_READ])
-                    + count($this->events[self::EV_WRITE])
-                    + count($this->events[self::EV_SIGNAL])
-                    + count($this->events[self::EV_INTERVAL])
-                    + count($this->events[self::EV_TIMEOUT]);
-        }
-        return 0;
-    }
-
-    /**
      * 清除指定类型事件侦听
      *
      * @param int $flag
      */
-    protected function clearModel(int $flag)
+    protected function clearModel(int $flag): void
     {
         foreach ($this->events[$flag] as $key => $data) {
-            $this->delCallback($flag, $key);
+            $this->delModel($flag, $key);
         }
     }
 }

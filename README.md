@@ -40,8 +40,8 @@ composer require 7csn/reactor
     * 套接字读
 
         ```php
-        # 增
-        $driver->addRead(resource $fd, callable $callback): bool;
+        # 增/改
+        $driver->setRead(resource $fd, callable $callback): bool;
           # 内部回调
           $callback($fd);
       
@@ -51,8 +51,8 @@ composer require 7csn/reactor
     * 套接字写
 
         ```php
-        # 增
-        $driver->addWrite(resource $fd, callable $callback): bool;
+        # 增/改
+        $driver->setWrite(resource $fd, callable $callback): bool;
           # 内部回调
           $callback($fd);
       
@@ -62,8 +62,8 @@ composer require 7csn/reactor
     * 信号
 
         ```php
-        # 增
-        $driver->addSignal(int $signal, callable $callback): bool;
+        # 增/改
+        $driver->setSignal(int $signal, callable $callback): bool;
           # 内部回调
           $callback($signal);
       
@@ -73,8 +73,8 @@ composer require 7csn/reactor
     * 周期性定时器
 
         ```php
-        # 增
-        $driver->addInterval(int $seconds, callable $callback): false|$timerId;
+        # 增（失败返回 0）
+        $driver->setInterval(int $seconds, callable $callback): $timerId;
           # 内部回调
           $callback($timerId);
       
@@ -84,8 +84,8 @@ composer require 7csn/reactor
     * 一次性定时器
 
         ```php
-        # 增
-        $driver->addTimeout(int $seconds, callable $callback): false|$timerId;
+        # 增（失败返回 0）
+        $driver->setTimeout(int $seconds, callable $callback): $timerId;
           # 内部回调
           $callback($timerId);
       
@@ -95,7 +95,7 @@ composer require 7csn/reactor
     * 兼容
     
         ```php
-        $driver->add(resource $fd|int $signal|int $seconds, int $flag, callable $callback): bool|$timerId
+        $driver->set(resource $fd|int $signal|int $seconds, int $flag, callable $callback): bool|$timerId
         $driver->del(resource $fd|int $signal|int $timerId, int $flag): bool
           # 事件类型
           $flag：
@@ -108,23 +108,28 @@ composer require 7csn/reactor
 * 事件轮询
 
     ```php
-    // 内部事件循环响应，处理阻塞进程
-    $driver->loop();
+    $driver->loop(): void;
     ```
-* 中断事件轮询
+* 退出事件轮询
 
     ```php
-    $driver->destroy();
+    $driver->destroy(): void;
     ```
 * 获取指定类型事件侦听数量
 
     ```php
     // 默认统计全部数量
-    $driver->getCount(int $flag = null);
+    $driver->getCount(int $flag = null): void;
     ```
 * 清空指定类型事件侦听
 
     ```php
     // 默认清空所有事件侦听
-    $driver->clear(int $flag = null);
+    $driver->clear(int $flag = null): void;
+    ```
+* 清空定时器事件侦听
+
+    ```php
+    // 默认清空所有定时器事件侦听
+    $driver->clearTimer(): void;
     ```

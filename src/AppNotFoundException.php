@@ -7,7 +7,7 @@ namespace chaser\reactor;
 use Exception;
 
 /**
- * 事件反应应用未找到异常
+ * 事件反应类未找到异常类
  *
  * @package chaser\reactor
  */

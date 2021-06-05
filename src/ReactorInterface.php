@@ -12,58 +12,58 @@ namespace chaser\reactor;
 interface ReactorInterface
 {
     /**
-     * 读事件
+     * 事件：资源读
      *
      * @var int
      */
     public const EV_READ = 0b10010;
 
     /**
-     * 写事件
+     * 事件：资源写
      *
      * @var int
      */
     public const EV_WRITE = 0b10100;
 
     /**
-     * 信号事件
+     * 事件：信号
      *
      * @var int
      */
     public const EV_SIGNAL = 0b11000;
 
     /**
-     * 周期性定时器事件
+     * 事件：周期性定时器
      *
      * @var int
      */
     public const EV_INTERVAL = 0b10001;
 
     /**
-     * 一次性定时器事件
+     * 事件：一次性定时器
      *
      * @var int
      */
     public const EV_TIMEOUT = 0b00001;
 
     /**
-     * 将事件侦听器添加到事件循环
+     * 添加或修改事件侦听器
      *
      * @param mixed $fd 流|信号|秒数
      * @param int $flag
      * @param callable $callback
      * @return bool|int
      */
-    public function add($fd, int $flag, callable $callback);
+    public function set(mixed $fd, int $flag, callable $callback): bool|int;
 
     /**
-     * 从事件循环中移除事件侦听器
+     * 移除事件侦听器
      *
      * @param mixed $fd 流|信号|秒数
      * @param int $flag
      * @return bool
      */
-    public function del($fd, int $flag): bool;
+    public function del(mixed $fd, int $flag): bool;
 
     /**
      * 主回路
@@ -76,7 +76,12 @@ interface ReactorInterface
     public function destroy(): void;
 
     /**
-     * 清空事件侦听
+     * 清空定时器事件侦听
+     */
+    public function clearTimer(): void;
+
+    /**
+     * 清空事件侦听器
      *
      * @param int|null $flag
      */
