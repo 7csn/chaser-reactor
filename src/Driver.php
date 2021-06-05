@@ -14,7 +14,6 @@ namespace chaser\reactor;
  * @method      bool|int    set($fd, int $flag, callable $callback)
  * @method      bool        del($fd, int $flag)
  * @method      void        loop()
- * @method      void        break()
  * @method      void        destroy()
  * @method      void        clear(int $flag = null)
  * @method      int         getCount(int $flag = null)
