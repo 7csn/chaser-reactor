@@ -216,7 +216,7 @@ abstract class Reactor implements ReactorInterface
      */
     public function setSignal(int $signal, callable $callback): bool
     {
-        return $this->setModel(self::EV_SIGNAL, fn() => $this->makeSignalData($signal, $callback));
+        return $this->setModel(self::EV_SIGNAL, fn() => $this->makeSignalData($signal, $callback), $signal);
     }
 
     /**
@@ -305,10 +305,10 @@ abstract class Reactor implements ReactorInterface
      *
      * @param int $flag
      * @param callable $addData
-     * @param int|null $key
+     * @param int $key
      * @return bool
      */
-    protected function setModel(int $flag, callable $addData, int $key = null): bool
+    protected function setModel(int $flag, callable $addData, int $key): bool
     {
         if (isset($this->events[$flag][$key]) && !$this->delModel($flag, $key)) {
             return false;
